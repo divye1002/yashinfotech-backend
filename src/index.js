@@ -1,23 +1,26 @@
 import express from 'express';
 import dotenv from 'dotenv';
-import mongoose from 'mongoose';
 import cors from 'cors';
 import helmet from 'helmet';
+
+import contactRoutes from './routes/contact.js';
+import { connectDB } from './db.js';   // 👈 import DB connector
 
 dotenv.config();
 
 const app = express();
+app.use(cors({ origin: ['http://localhost:3000'] }));
 app.use(express.json());
-app.use(cors());
-app.use(helmet());
+app.use('/api/contact', contactRoutes);
 
-// DB connection
-mongoose.connect(process.env.MONGO_URI || 'mongodb://localhost:27017/yashinfotech')
-  .then(() => console.log('✅ MongoDB connected'))
-  .catch(err => console.error('❌ Mongo error', err));
+// DB connect
+await connectDB();
 
-// Health check
+// Health (optional)
 app.get('/health', (_req, res) => res.json({ status: 'ok' }));
 
+// Contact route
+app.use('/api/contact', contactRoutes);
+
 const PORT = process.env.PORT || 4000;
-app.listen(PORT, () => console.log(`🚀 Server running on http://localhost:${PORT}`));
+app.listen(PORT, () => console.log(`🚀 API on http://localhost:${PORT}`));
